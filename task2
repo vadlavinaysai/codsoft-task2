@@ -1,0 +1,49 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import numpy as np
+
+# Load your dataset
+data = pd.read_csv(r"V:\imdb_movierating.csv", encoding='latin1')
+
+# Select relevant features for prediction
+X = data[['Genre', 'Director', 'Actor 1', 'Actor 2', 'Actor 3']]
+y = data['Rating']
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize LabelEncoders for categorical features
+le_genre = LabelEncoder()
+le_director = LabelEncoder()
+le_actor1 = LabelEncoder()
+le_actor2 = LabelEncoder()
+le_actor3 = LabelEncoder()
+
+# Fit LabelEncoders and transform categorical features
+X_train['Genre'] = le_genre.fit_transform(X_train['Genre'].astype(str))
+X_train['Director'] = le_director.fit_transform(X_train['Director'].astype(str))
+X_train['Actor 1'] = le_actor1.fit_transform(X_train['Actor 1'].astype(str))
+X_train['Actor 2'] = le_actor2.fit_transform(X_train['Actor 2'].astype(str))
+X_train['Actor 3'] = le_actor3.fit_transform(X_train['Actor 3'].astype(str))
+
+# Transform categorical features for test set
+X_test['Genre'] = le_genre.transform(X_test['Genre'].astype(str))
+X_test['Director'] = le_director.transform(X_test['Director'].astype(str))
+X_test['Actor 1'] = le_actor1.transform(X_test['Actor 1'].astype(str))
+X_test['Actor 2'] = le_actor2.transform(X_test['Actor 2'].astype(str))
+X_test['Actor 3'] = le_actor3.transform(X_test['Actor 3'].astype(str))
+
+# Initialize and train the RandomForestRegressor model
+model = RandomForestRegressor(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate model performance
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+print(f"Root Mean Squared Error (RMSE): {rmse}")
